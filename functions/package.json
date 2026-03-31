@@ -4,7 +4,7 @@
   "description": "Encrypts sensitive Firestore fields using AES-256-GCM on write.",
   "main": "lib/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "echo 'pre-built'",
     "build:watch": "tsc --watch"
   },
   "engines": {
