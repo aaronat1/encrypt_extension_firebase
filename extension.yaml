@@ -1,0 +1,155 @@
+name: firestore-field-encrypt
+version: 0.1.0
+specVersion: v1beta
+displayName: Firestore Field Encrypt
+description: >-
+  Automatically encrypts sensitive Firestore fields (emails, phone numbers, PII)
+  using AES-256-GCM on write and decrypts them on read via an HTTPS endpoint.
+  GDPR-friendly: encrypted values are unreadable without the key.
+license: Apache-2.0
+icon: icon.png
+author:
+  authorName: aaronat1
+  authorUrl: https://github.com/aaronat1
+sourceUrl: https://github.com/aaronat1/firestore-field-encrypt
+billingRequired: true
+
+roles:
+  - role: datastore.user
+    reason: Required to read documents and write encrypted field values back to Firestore.
+
+resources:
+  - name: encryptFieldsL1
+    type: firebaseextensions.v1beta.function
+    description: Encrypts configured fields on document write for top-level collections.
+    properties:
+      location: ${LOCATION}
+      runtime: nodejs20
+      eventTrigger:
+        eventType: providers/cloud.firestore/eventTypes/document.write
+        resource: projects/${PROJECT_ID}/databases/(default)/documents/{c1}/{d1}
+
+  - name: encryptFieldsL2
+    type: firebaseextensions.v1beta.function
+    description: Encrypts configured fields on document write for depth-2 subcollections.
+    properties:
+      location: ${LOCATION}
+      runtime: nodejs20
+      eventTrigger:
+        eventType: providers/cloud.firestore/eventTypes/document.write
+        resource: projects/${PROJECT_ID}/databases/(default)/documents/{c1}/{d1}/{c2}/{d2}
+
+  - name: encryptFieldsL3
+    type: firebaseextensions.v1beta.function
+    description: Encrypts configured fields on document write for depth-3 subcollections.
+    properties:
+      location: ${LOCATION}
+      runtime: nodejs20
+      eventTrigger:
+        eventType: providers/cloud.firestore/eventTypes/document.write
+        resource: projects/${PROJECT_ID}/databases/(default)/documents/{c1}/{d1}/{c2}/{d2}/{c3}/{d3}
+
+  - name: encryptFieldsL4
+    type: firebaseextensions.v1beta.function
+    description: Encrypts configured fields on document write for depth-4 subcollections.
+    properties:
+      location: ${LOCATION}
+      runtime: nodejs20
+      eventTrigger:
+        eventType: providers/cloud.firestore/eventTypes/document.write
+        resource: projects/${PROJECT_ID}/databases/(default)/documents/{c1}/{d1}/{c2}/{d2}/{c3}/{d3}/{c4}/{d4}
+
+  - name: encryptFieldsL5
+    type: firebaseextensions.v1beta.function
+    description: Encrypts configured fields on document write for depth-5 subcollections.
+    properties:
+      location: ${LOCATION}
+      runtime: nodejs20
+      eventTrigger:
+        eventType: providers/cloud.firestore/eventTypes/document.write
+        resource: projects/${PROJECT_ID}/databases/(default)/documents/{c1}/{d1}/{c2}/{d2}/{c3}/{d3}/{c4}/{d4}/{c5}/{d5}
+
+  - name: decryptField
+    type: firebaseextensions.v1beta.function
+    description: >-
+      HTTPS endpoint that decrypts a specific document field given a valid service
+      account token. Use server-side only — never call from the client directly.
+    properties:
+      location: ${LOCATION}
+      runtime: nodejs20
+      httpsTrigger: {}
+
+params:
+  - param: LOCATION
+    label: Cloud Functions location
+    description: >-
+      Where do you want to deploy the functions created for this extension?
+    type: select
+    options:
+      - label: Iowa (us-central1)
+        value: us-central1
+      - label: South Carolina (us-east1)
+        value: us-east1
+      - label: Northern Virginia (us-east4)
+        value: us-east4
+      - label: Los Angeles (us-west2)
+        value: us-west2
+      - label: Salt Lake City (us-west3)
+        value: us-west3
+      - label: Las Vegas (us-west4)
+        value: us-west4
+      - label: Belgium (europe-west1)
+        value: europe-west1
+      - label: London (europe-west2)
+        value: europe-west2
+      - label: Frankfurt (europe-west3)
+        value: europe-west3
+      - label: Zurich (europe-west6)
+        value: europe-west6
+      - label: Taiwan (asia-east1)
+        value: asia-east1
+      - label: Hong Kong (asia-east2)
+        value: asia-east2
+      - label: Tokyo (asia-northeast1)
+        value: asia-northeast1
+      - label: Osaka (asia-northeast2)
+        value: asia-northeast2
+      - label: Seoul (asia-northeast3)
+        value: asia-northeast3
+      - label: Mumbai (asia-south1)
+        value: asia-south1
+      - label: Singapore (asia-southeast1)
+        value: asia-southeast1
+      - label: Jakarta (asia-southeast2)
+        value: asia-southeast2
+      - label: Sydney (australia-southeast1)
+        value: australia-southeast1
+    required: true
+    immutable: true
+
+  - param: ENCRYPTION_KEY
+    label: AES-256 encryption key (hex)
+    description: >-
+      A 64-character hexadecimal string representing the 32-byte AES-256 key.
+      Generate with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+      Keep this secret — losing it means losing access to all encrypted data.
+    type: secret
+    required: true
+
+  - param: FIELDS_TO_ENCRYPT
+    label: Fields to encrypt
+    description: >-
+      Comma-separated list of field names to encrypt. All collections with these
+      field names will have them encrypted. Example: email,phone,ssn
+    type: string
+    required: true
+
+  - param: ENCRYPTED_FIELD_SUFFIX
+    label: Encrypted field suffix
+    description: >-
+      Suffix appended to the original field name to store the encrypted value.
+      Example: suffix "_enc" turns "email" into "email_enc".
+      The original plain-text field is then deleted.
+    type: string
+    default: _enc
+    required: true
