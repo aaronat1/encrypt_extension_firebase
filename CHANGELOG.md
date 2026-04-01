@@ -1,3 +1,8 @@
+## Version 0.1.1
+
+- Fix: set Node.js engine to 18 for Cloud Build compatibility.
+- Add package-lock.json for reproducible builds.
+
 ## Version 0.1.0
 
 - Initial release.
