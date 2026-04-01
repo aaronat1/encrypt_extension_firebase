@@ -1,5 +1,5 @@
 name: firestore-field-encrypt
-version: 0.1.0
+version: 0.1.1
 specVersion: v1beta
 displayName: Firestore Field Encrypt
 description: >-
